@@ -1,0 +1,56 @@
+const express=require("express");
+const {
+  admincreateMasterController,adminupdateMasterAccountByIdController,deleteAdminMasterController,admingetMasterAccountsController,
+admingetAllAccountsController
+
+} =require( "../controllers/adminMasterController.js");
+
+
+const apiKeyMiddleware = require("../middlewares/apiKeyMiddleware.js");
+
+const router = express.Router();
+
+/**
+ * ✅ IMPORTANT (recommended):
+ * Add auth middleware here (JWT etc.)
+ * router.use(requireUserAuth)
+ */
+
+// Optional: ownership check helper (recommended)
+// async function ensureAccountBelongsToUser(req, mt5Account) {
+//   // Example logic (adapt to your schema):
+//   // if (req.user.role === "admin") return;
+//   // const owns = req.user.accounts?.some(a => String(a.accountNumber) === String(mt5Account));
+//   // if (!owns) throw new Error("Unauthorized MT5 account");
+// }
+
+// router.get('/masters', apiKeyMiddleware, getMasterAccountIdController);   // Get a single master
+router.post('/masters', apiKeyMiddleware, admincreateMasterController);   // Create a master
+router.put('/masters/:id', apiKeyMiddleware,adminupdateMasterAccountByIdController);  // Update a master
+// router.get('/masters/:id/copiers', protect, masterController.getMasterCopiers);
+router.delete('/masters/:id', apiKeyMiddleware,deleteAdminMasterController);
+
+router.get('/get-all-masters', apiKeyMiddleware, admingetMasterAccountsController);
+
+router.get('/get-all-accounts',apiKeyMiddleware,admingetAllAccountsController);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// router.get("/groups",apiKeyMiddleware, makeGroupsService)
+
+
+// router.get("/close-trades-all-users", apiKeyMiddleware,getCloseTradeAllUsersService)
+
+
+module.exports=router;
