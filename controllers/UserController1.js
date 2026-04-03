@@ -73,103 +73,31 @@ const uploadFields = upload.fields([
 ]);
 // signup ---------------------
 
-// const registerUserController = async (req, res) => {
-//   const Body = req.body;
-//   const { id } = req.params;
-
-//   console.log("id->>>>>>>>", id);
-
-//   try {
-//     const referralByUser = id
-//       ? await UserModel.findOne({ referralAccount: id })
-//       : null; // find user by referral id
-
-//     console.log("referralByUser->>>>>>>>", referralByUser);
-
-//     const emailExists = await UserModel.findOne({ email: Body.email });
-//     if (emailExists) {
-//       return res
-//         .status(400)
-//         .json({ msg: "Email already exists", status: false });
-//     }
-//     // Hash the password
-//     const saltRounds = 10; // Number of salt rounds for bcrypt
-//     const hashedPassword = await bcrypt.hash(Body.password, saltRounds);
-
-//     // const token = crypto.randomBytes(32).toString("hex");
-//     // const tokenExpiry=new Date(Date.now()+60*60*1000);
-//     const user = await UserModel.create({
-//       firstName: Body.firstName,
-//       lastName: Body.lastName,
-//       email: Body.email,
-//       phone: Body.phone,
-//       country: Body.country,
-//       state: Body.state,
-//       city: Body.city,
-//       zipCode: Body.zipCode,
-//       address: Body.address,
-//       password: hashedPassword,
-//       Actualpassword: Body.password,
-//       referralFromUserId: referralByUser?._id,
-//       referralFromId: id || null,
-//       // token:token,
-//       // tokenExpiry:tokenExpiry,
-//     });
-
-//     req.body.userId = user._id;
-
-// await sendVerificationLinkController(req,res);
-
-//     // if (user) {
-//     //   res.status(201).json({
-//     //     msg: "User created successfully",
-//     //     user: user,
-//     //     status: true,
-//     //   });
-//     // } else {
-//     //   return res
-//     //     .status(400)
-//     //     .json({ msg: "Something went wrong", status: false });
-//     // }
-//   } catch (error) {
-//     console.error("Error in registerUser:", error.message);
-//     return res
-//       .status(500)
-//       .json({ msg: "Internal Server Error", status: false });
-//   }
-// };
-
 const registerUserController = async (req, res) => {
   const Body = req.body;
-  console.log("Body", Body);
   const { id } = req.params;
+
+  console.log("id->>>>>>>>", id);
 
   try {
     const referralByUser = id
       ? await UserModel.findOne({ referralAccount: id })
-      : null;
+      : null; // find user by referral id
+
+    console.log("referralByUser->>>>>>>>", referralByUser);
 
     const emailExists = await UserModel.findOne({ email: Body.email });
-    console.log("emailExists", emailExists);
-
     if (emailExists) {
-      if (!emailExists.emailVerified) {
-        return res.status(400).json({
-          msg: "Email already registered but not verified. Please resend verification email.",
-          status: false,
-          emailVerified: false,
-        });
-      }
-
-      return res.status(400).json({
-        msg: "Email already exists",
-        status: false,
-      });
+      return res
+        .status(400)
+        .json({ msg: "Email already exists", status: false });
     }
-
-    const saltRounds = 10;
+    // Hash the password
+    const saltRounds = 10; // Number of salt rounds for bcrypt
     const hashedPassword = await bcrypt.hash(Body.password, saltRounds);
 
+    // const token = crypto.randomBytes(32).toString("hex");
+    // const tokenExpiry=new Date(Date.now()+60*60*1000);
     const user = await UserModel.create({
       firstName: Body.firstName,
       lastName: Body.lastName,
@@ -181,37 +109,33 @@ const registerUserController = async (req, res) => {
       zipCode: Body.zipCode,
       address: Body.address,
       password: hashedPassword,
-      referralFromUserId: referralByUser?._id || null,
+      Actualpassword: Body.password,
+      referralFromUserId: referralByUser?._id,
       referralFromId: id || null,
-      emailVerified: false,
+      // token:token,
+      // tokenExpiry:tokenExpiry,
     });
 
     req.body.userId = user._id;
 
-    try {
-      await sendVerificationLinkController(req, res);
+    await sendVerificationLinkController(req, res);
 
-      return res.status(201).json({
-        msg: "User registered successfully. Verification email sent.",
-        status: true,
-        emailVerified: false,
-      });
-    } catch (mailError) {
-      console.error("Verification email send failed:", mailError.message);
-
-      return res.status(201).json({
-        msg: "Account created, but verification email could not be sent. Please resend verification email.",
-        status: true,
-        emailSent: false,
-        emailVerified: false,
-      });
-    }
+    // if (user) {
+    //   res.status(201).json({
+    //     msg: "User created successfully",
+    //     user: user,
+    //     status: true,
+    //   });
+    // } else {
+    //   return res
+    //     .status(400)
+    //     .json({ msg: "Something went wrong", status: false });
+    // }
   } catch (error) {
     console.error("Error in registerUser:", error.message);
-    return res.status(500).json({
-      msg: "Internal Server Error",
-      status: false,
-    });
+    return res
+      .status(500)
+      .json({ msg: "Internal Server Error", status: false });
   }
 };
 
@@ -307,14 +231,14 @@ const loginUserController = async (req, res) => {
       res.cookie("userat", accessToken, {
         httpOnly: true,
         secure: true,
-        sameSite: "strict",
+        sameSite: "none",
         maxAge: 15 * 60 * 1000, //15min
       });
 
       res.cookie("userrt", refreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: "strict",
+        sameSite: "none",
         maxAge: 60 * 60 * 1000, //1hr
       });
 
